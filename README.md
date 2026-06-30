@@ -2,15 +2,15 @@
 
 Welcome to **InfluencerHub**! This repository is my submission for the Wobb Frontend Engineering Assignment. 
 
-I took a basic, starter React application that was intentionally functional but not production-ready, identified and resolved critical bugs, added state management, integrated interactive charting, and overhauled the entire UI/UX with smooth, professional animations.
+I took a basic, starter React application that was intentionally left in a rough-but-working state, identified and resolved critical bugs, added state management, integrated interactive charting, and overhauled the entire UI/UX with smooth, professional animations.
 
 ---
 
-## 🔗 Repository & Submission Details
+## 🔗 Repository, Live Demo & Details
+- **Live Deployment (Vercel)**: [wobb-influencers-search.vercel.app](https://wobb-influencers-search.vercel.app/)
 - **GitHub Repository**: [Subodh26oct/Wobb_Influencers_Search](https://github.com/Subodh26oct/Wobb_Influencers_Search)
 - **Git Clone URL**: `https://github.com/Subodh26oct/Wobb_Influencers_Search.git`
 - **Codebase Build Status**: ✅ Passing (`npm run build` compiles clean under 500ms)
-- **Primary Tech Stack**: React 19, TypeScript 6, Vite 8, Zustand 5, Recharts 2, Framer Motion 12, Tailwind CSS 4
 
 ---
 
@@ -32,39 +32,42 @@ I took a basic, starter React application that was intentionally functional but 
 
 ---
 
-## 🛠️ Deep Dive into Implementations
+## 🛠️ Deep Dive into Implementations & Tech Stack
 
-### 1. Robust State Management with Zustand
-- Configured a unified `useListStore` utilizing Zustand's `persist` middleware. All curated lists are saved in browser storage (`localStorage`) so that refreshing the page does not lose the selected profiles.
-- Implemented a duplicate check (`profiles.some(p => p.user_id === new_id)`) to prevent curators from adding the same influencer twice.
+### 1. Robust State Management (Zustand + Persist)
+* **Zustand (`^5.0.14`)**: Replaced React Context with Zustand to manage the curation list. It decouples state from the component tree, preventing unnecessary top-level re-renders.
+* **State Persistence**: Configured Zustand's `persist` middleware to automatically serialize the list state into `localStorage`. The list remains intact even after browser reloads.
+* **Duplicate Prevention**: Implemented duplicate checking logic inside the store to prevent recruiters or curators from adding the exact same profile twice.
 
 ### 2. Smart `<Avatar />` Fallback Engine
-- External hotlinks (like Instagram or YouTube CDNs) expire. To solve this, the new component:
-  1. Catches loading failures through `onError`.
-  2. Automatically extracts the creator's initials (e.g. `✿ Kids Diana Show` -> `KD`).
-  3. Displays a tailored platform-specific CSS gradient (Instagram: pink-purple, YouTube: dark crimson, TikTok: cyan-magenta-black).
-  4. Renders a miniature brand badge at the corner for a professional overlay.
+* **Broken Link Detection**: Created a resilient Avatar component that detects failed image fetches (`onError` listener) caused by expired hotlinks or blocked hotlinking on external CDNs.
+* **Initials Parsing**: Safely cleanses the influencer's name from emojis and special characters to compute clean initials (e.g. `✿ Kids Diana Show` -> `KD`).
+* **Platform-Branded Gradients**: Styled fallback initials with premium CSS gradient combinations matching the platform colors:
+  * **Instagram**: pink-purple-orange gradient.
+  * **YouTube**: deep crimson gradient.
+  * **TikTok**: dark cyan-magenta-black gradient.
+* **Overlay Brand Badges**: Automatically overlays a miniature SVG platform badge at the corner of the avatar for quick recognition.
 
-### 3. Dynamic Profile Reconstruction
-- Because only 6 profile JSON files were provided, the other 24 creators were unreachable. 
-- In [profileLoader.ts](src/lib/profileLoader.ts), I added a search-list scanner. If the file is missing, it dynamically generates a complete profile details object on-the-fly, creating realistic descriptions, posts, likes, views, and historical charts.
+### 3. Dynamic Profile Detail Reconstruction
+* **Vite Glob Loader**: Leveraged Vite's ESM-based dynamic import resolver (`import.meta.glob`) to lazy-load JSON files.
+* **Smart Mock Fallback**: To handle the 24 profiles missing detail files, the loader intercepts requests, matches the summary data across the three search databases, and constructs a detailed user payload on-the-fly. This prevents broken routes and enables complete navigation for all 30 profiles.
 
-### 4. Interactive Follower Growth Charts
-- Installed and integrated **Recharts** to display an SVG growth chart.
-- Responsive container adapts automatically to mobile and desktop screens.
-- Customized tooltips use the app's dark-theme glassmorphism card styling.
+### 4. SVG follow History Visualization (Recharts)
+* **Recharts (`^2.12.7`)**: Integrated Recharts to render Area Charts plotting follower counts over the last 6 months.
+* **Custom Tooltips**: Styled tooltips with glassmorphism (translucent dark panels, subtle border outlines, and backdrop blurs) to match the dark-theme aesthetic.
+* **Color Themes**: Follows the active platform color scheme (Instagram: pink/purple fill, YouTube: red fill, TikTok: cyan/magenta fill).
 
-### 5. TSConfig and Build Cleaning
-- Removed the deprecated compiler option `baseUrl` from `tsconfig.app.json` which resolves compilation warnings in TypeScript 6.x. The project builds clean with zero errors.
+### 5. Advanced UI/UX & Micro-interactions
+* **Framer Motion (`^12.42.1`)**: Uses layout animations and spring physics (`stiffness`, `damping`) rather than standard CSS linear transitions, creating native, fluid animation states.
+  * **Entrance Effects**: Staggered cards float up smoothly on page load.
+  * **Tab Indicators**: The platform tab selection bar features a sliding spring bubble indicator.
+  * **Sidebar Slide-In**: The "My List" drawer slides out from the right with a dampening spring recoil.
+  * **Card Hover Glow**: Hovering over cards enlarges them slightly and emits a platform-colored ambient glow.
+* **Lucide React (`^1.22.0`)**: Integrated SVG icons throughout filters, badges, stats, and navigation.
 
----
-
-## 📦 Third-Party Libraries Added
-- **`zustand`**: State management with local persistence.
-- **`recharts`**: SVG data visualization for growth trends.
-- **`framer-motion`**: Interactive spring animations and layout transitions.
-- **`react-hot-toast`**: Visual toast confirmations for adding/removing profiles.
-- **`lucide-react`**: Vector icons.
+### 6. Clean Codebase & Optimization
+* **Component Memoization**: Used React's `memo` along with `useCallback` and `useMemo` hooks to avoid unnecessary child component updates, keeping the app lightweight and fast.
+* **Build Cleaning**: Fixed deprecation warnings in `tsconfig.app.json` by removing `baseUrl` for path mapping (as modern TypeScript resolves path aliases natively).
 
 ---
 
